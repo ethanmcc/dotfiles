@@ -1,0 +1,10 @@
+eval "$(hub alias -s)"
+alias oig='git browse'
+
+function pkg () {
+    package=$($HOME/bin/pkg "$1")
+    if [ -n "$package" ]; then
+        cd "$package"
+        unset package
+    fi
+}
