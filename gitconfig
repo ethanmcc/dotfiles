@@ -1,2 +1,7 @@
-[aliases]
+[alias]
    st = status
+[user]
+	name = Ethan McCreadie
+	email = ethanmcc@gmail.com
+[mergetool]
+	keepBackup = true

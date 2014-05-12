@@ -1,4 +1,6 @@
-eval "$(hub alias -s)"
+function git() {
+    hub $@
+}
 alias oig='git browse'
 
 function pkg () {
