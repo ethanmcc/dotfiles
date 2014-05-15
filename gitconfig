@@ -5,3 +5,5 @@
 	email = ethanmcc@gmail.com
 [mergetool]
 	keepBackup = true
+[core]
+	editor = /usr/bin/vim -f
