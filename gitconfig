@@ -6,4 +6,4 @@
 [mergetool]
 	keepBackup = true
 [core]
-	editor = /usr/bin/vim -f
+	editor = /usr/bin/env vim -f
