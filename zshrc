@@ -55,7 +55,14 @@ source $HOME/.aliases
 
 # User configuration
 
-export PATH=$HOME/bin:$HOME/.rbenv/shims:/usr/local/opt/ruby/bin:/usr/local/bin:$PATH
+export PATH=$HOME/bin:$HOME/.rbenv/shims:/usr/local/opt/ruby/bin:/usr/local/bin:$HOME/AWS-ElasticBeanstalk-CLI-2.6.2/eb/macosx/python2.7:$PATH
+
+if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
+
+# Virtualenv Wrapper configuration
+export WORKON_HOME=~/.virtualenvs
+source /usr/local/bin/virtualenvwrapper.sh
+
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
