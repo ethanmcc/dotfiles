@@ -7,3 +7,6 @@
 	keepBackup = true
 [core]
 	editor = /usr/bin/env vim -f
+[filter "media"]
+	clean = git-media-clean %f
+	smudge = git-media-smudge %f
