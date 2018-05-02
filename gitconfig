@@ -2,11 +2,26 @@
    st = status
 [user]
 	name = Ethan McCreadie
-	email = ethanmcc@gmail.com
+	email = ethan.mccreadie@nrg.com
 [mergetool]
 	keepBackup = true
 [core]
 	editor = /usr/bin/env vim -f
+	excludesfile = /Users/emccreadie/.gitignore_global
 [filter "media"]
 	clean = git-media-clean %f
 	smudge = git-media-smudge %f
+[diff]
+	tool = opendiff
+[merge]
+	tool = opendiff
+[url "https://"]
+	insteadOf = git://
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true
+[commit]
+	template = /Users/emccreadie/.stCommitMsg

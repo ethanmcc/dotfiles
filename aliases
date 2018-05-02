@@ -12,5 +12,95 @@ function pkg () {
 }
 
 function lsec2() {
-    aws ec2 describe-instances | jq "[.Reservations[] | .Instances[0] | select(.State.Name == \"running\") | {PrivateIPAddress: .NetworkInterfaces[0].PrivateIpAddress, VPC: .VpcId, SubnetID: .SubnetId, InstanceID: .InstanceId, InstanceType: .InstanceType, Tags: [.Tags[] | {key: .Key, value: .Value}] | from_entries} | select(.Tags.Name | contains(\"$1\"))]"
+    aws ec2 describe-instances | jq "[.Reservations[] | .Instances[0] | select(.State.Name == \"running\") | {PrivateIPAddress: .NetworkInterfaces[0].PrivateIpAddress, PublicIPAddress: .NetworkInterfaces[0].Association.PublicIp, VPC: .VpcId, SubnetID: .SubnetId, InstanceID: .InstanceId, InstanceType: .InstanceType, KeyName: .KeyName, Tags: [.Tags[] | {key: .Key, value: .Value}] | from_entries} | select(.Tags.Name | contains(\"$1\"))]" 2> /dev/null
+}
+
+function lsoa() {
+    ARGS=$@
+    for stackId in `aws opsworks describe-stacks | jq -r ".Stacks | map(select(.Name| contains(\"$ARGS\"))) | .[] | .StackId"`; do
+        aws opsworks describe-apps --stack-id $stackId | jq .
+    done | jq -s .
+}
+
+function ipl() {
+    lsec2 | jq "map(select(.PrivateIPAddress | contains(\"$1\")))" 2> /dev/null
+}
+
+function iid() {
+    jq -c 'map(.InstanceID)'
+}
+
+function docker-enter() {
+    boot2docker ssh -t "[ -f /var/lib/boot2docker/nsenter ] || docker run --rm -v /var/lib/boot2docker/:/target jpetazzo/nsenter
+    sudo /var/lib/boot2docker/docker-enter $@"
+}
+
+function ec2l() {
+    aws ec2 describe-instances --output table   --query 'Reservations[].Instances[].[Tags[?Key==`Name`] | [0].Value, State.Name, PrivateIpAddress]'
+}
+
+alias ssh_unsafe='ssh -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+alias lsec2g="aws ec2 describe-instances --output table   --query 'Reservations[].Instances[].[Tags[?Key==\`Name\`] | [0].Value, State.Name, PrivateIpAddress]' | grep "
+
+function lsec2_first_ip {
+    # lsec2g products | grep -v pt | cut -d \| -f 4 | head -1 | xargs
+    app_name=${1?param missing - app name.}
+    env_name=${2?param missing - env name.}
+    lsec2g ${app_name} | grep ${env_name} | cut -d \| -f 4 | head -1 | xargs
+}
+
+function elbdev {
+    asp dev
+    echo "attempting to ssh to the $2 environment in the $1 application (dev key)"
+    ssh_unsafe -i ~/.ssh/aws/dev.pem ec2-user@`lsec2_first_ip $1 $2`
+}
+
+function elbprod {
+    asp prod
+    echo "attempting to ssh to the $2 environment in the $1 application (prod1 key)"
+    ssh_unsafe -i ~/.ssh/aws/prod1.pem ec2-user@`lsec2_first_ip $1 $2`
+}
+
+function gb {
+    git rev-parse --abbrev-ref HEAD
+}
+
+function cs3 {
+    s3cat s3://nrg-portal/$1 2> /dev/null | jq .
+}
+
+function ecs3 {
+    s3cat s3://nrg-portal-$ECC_ENVIRONMENT/$1 2> /dev/null | jq .
+}
+
+function br {
+    git symbolic-ref --short HEAD
+}
+
+function sqsst {
+	aws sqs list-queues --output text | cut -f2 | grep prod-ecc- | xargs -n1 aws sqs get-queue-attributes --attribute-names QueueArn ApproximateNumberOfMessages --queue-url | jq -r '[.Attributes.QueueArn,.Attributes.ApproximateNumberOfMessages] | @tsv' | cut -d: -f6
+}
+
+function ec2p {
+    AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq "[.[]|select(.Tags.env == '$2')][0].PrivateIPAddress" -r
+}
+
+function ec2d {
+    AWS_DEFAULT_PROFILE=dev lsec2 $1 | jq "[.[]|select(.Tags.env == '$2')][0].PrivateIPAddress" -r
+}
+
+function sshec2 {
+    ssh -i ~/.ssh/aws/prod1.pem ec2-user@`AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq '[.[]|select(.Tags.env == "prod")][0].PrivateIPAddress' -r`
+}
+
+function pdjec2 {
+    ssh -i ~/.ssh/aws/prod1.pem ec2-user@`AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq '[.[]|select(.Tags.env == "prod")][0].PrivateIPAddress' -r` -t "cd /opt/python/current; source ./env; cd app; sudo -E -u wsgi /opt/python/run/venv/bin/python manage.py $2"
+}
+
+function sshec2pt {
+    ssh -i ~/.ssh/aws/prod1.pem ec2-user@`AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq '[.[]|select(.Tags.env == "pt")][0].PrivateIPAddress' -r`
+}
+
+function pdjec2pt {
+    ssh -i ~/.ssh/aws/prod1.pem ec2-user@`AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq '[.[]|select(.Tags.env == "pt")][0].PrivateIPAddress' -r` -t "cd /opt/python/current; source ./env; cd app; sudo -E -u wsgi /opt/python/run/venv/bin/python manage.py $2"
 }

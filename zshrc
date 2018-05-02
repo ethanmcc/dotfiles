@@ -48,17 +48,18 @@ ZSH_THEME="robbyrussell"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(gitfast aws brew fabric gem jira npm pep8 pip python vagrant)
+plugins=(gitfast aws brew fabric gem jira npm pep8 pip python vagrant gnu-utils knife docker emoji elixir)
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.aliases
 
 # User configuration
 
-export PATH=$HOME/bin:$HOME/.rbenv/shims:/usr/local/opt/ruby/bin:/usr/local/bin:$HOME/AWS-ElasticBeanstalk-CLI-2.6.2/eb/macosx/python2.7:$PATH
+export GOPATH=~/go
+eval "$(rbenv init -)"
+export PATH=$HOME/bin:/usr/local/sbin:$HOME/go/bin:/opt/chefdk/bin:$HOME/.rbenv/shims:/usr/local/bin:$HOME/AWS-ElasticBeanstalk-CLI-2.6.2/eb/macosx/python2.7:$GOPATH:$PATH
 
-if which rbenv > /dev/null; then eval "$(rbenv init -)"; fi
-
+# removed 1/20/16 - $HOME/.chefdk/gem/ruby/2.1.0/bin:/opt/chefdk/embedded/bin:/usr/local/opt/ruby/bin
 # Virtualenv Wrapper configuration
 export WORKON_HOME=~/.virtualenvs
 source /usr/local/bin/virtualenvwrapper.sh
@@ -68,15 +69,13 @@ source /usr/local/bin/virtualenvwrapper.sh
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
 
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
+export EDITOR='vim'
 
 # Compilation flags
 # export ARCHFLAGS="-arch x86_64"
 
 # ssh
 # export SSH_KEY_PATH="~/.ssh/dsa_id"
+eval $(/usr/libexec/path_helper -s)
+
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh"
