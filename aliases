@@ -3,12 +3,18 @@ function git() {
 }
 alias oig='git browse'
 
-function pkg () {
-    package=$($HOME/bin/pkg "$1")
-    if [ -n "$package" ]; then
-        cd "$package"
-        unset package
-    fi
+pkg () {
+    if [ -z "$1" ]
+    then
+        cd ~/git
+    else
+        package=$($HOME/bin/pkg "$1")
+        if [ -n "$package" ]
+        then
+            cd "$package"
+            unset package
+        fi
+	fi
 }
 
 function lsec2() {
@@ -103,4 +109,36 @@ function sshec2pt {
 
 function pdjec2pt {
     ssh -i ~/.ssh/aws/prod1.pem ec2-user@`AWS_DEFAULT_PROFILE=prod lsec2 $1 | jq '[.[]|select(.Tags.env == "pt")][0].PrivateIPAddress' -r` -t "cd /opt/python/current; source ./env; cd app; sudo -E -u wsgi /opt/python/run/venv/bin/python manage.py $2"
+}
+
+function azcol() {
+    awk '
+  /\[Information\]/ {print "\033[32m" $0 "\033[39m"}
+  /\[Warn\]/ {print "\033[31m" $0 "\033[39m"}
+  /\[Error\]/ {print "\033[31m" $0 "\033[39m"}
+'
+}
+
+function focus() {
+    defaults write com.apple.dock single-app -bool true; killall Dock
+}
+
+function nofocus() {
+    defaults write com.apple.dock single-app -bool false; killall Dock
+}
+
+function location_ids {
+    http https://gopuff-data-api.azurewebsites.net/locations | jq 'map([(.id|tostring), .title] | join(",")) | join("\n")' -r
+}
+
+function funcdisable {
+    ls | grep -v '\.' | grep -vE '(bin|obj|test|shared|website|node_modules|cypress)' | sed 's/^/"AzureWebJobs./' | sed 's/$/.Disabled": "true",/'
+}
+
+function loc () {
+    if [[ "$1" =~ '^[0-9]+$' ]]; then
+        http https://dataapi.gopuff.com/locations/$1 | jq '{ id, title, state_abbr }'
+    else
+        http https://dataapi.gopuff.com/locations | jq ".[] | select(.title | test(\".*$1.*\"; \"i\")) | { id, title, state_abbr }"
+    fi
 }
