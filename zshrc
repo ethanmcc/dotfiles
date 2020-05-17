@@ -48,7 +48,8 @@ ZSH_THEME="robbyrussell"
 # Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(gitfast aws brew gem jira npm pep8 pip python gnu-utils pyenv)
+plugins=(gitfast aws brew gem jira npm pep8 pip python gnu-utils pyenv ssh-agent kubectl docker golang)
+zstyle :omz:plugins:ssh-agent identities id_rsa ethanmcc_netxmv_id_rsa ethanmcc_dash_id_rsa
 
 source $ZSH/oh-my-zsh.sh
 source $HOME/.aliases
@@ -108,7 +109,8 @@ if command -v pyenv 1>/dev/null 2>&1; then
 fi
 pyenv virtualenvwrapper
 
-export PATH=$PATH:/usr/local/homebrew/opt/libpq/bin
+export PATH=$PATH:/usr/local/homebrew/opt/libpq/bin:$GOPATH/bin
+export GOPRIVATE=github.com/nextmv-io/*,github.com/gopuff/*
 
 # tabtab source for slss package
 # uninstall by removing these lines or running `tabtab uninstall slss`

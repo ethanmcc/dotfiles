@@ -17,6 +17,20 @@ pkg () {
 	fi
 }
 
+gpkg () {
+    if [ -z "$1" ]
+    then
+        cd $GOPATH/src/github.com/gopuff
+    else
+        package=$($HOME/bin/gpkg "$1")
+        if [ -n "$package" ]
+        then
+            cd "$package"
+            unset package
+        fi
+	fi
+}
+
 function lsec2() {
     aws ec2 describe-instances | jq "[.Reservations[] | .Instances[0] | select(.State.Name == \"running\") | {PrivateIPAddress: .NetworkInterfaces[0].PrivateIpAddress, PublicIPAddress: .NetworkInterfaces[0].Association.PublicIp, VPC: .VpcId, SubnetID: .SubnetId, InstanceID: .InstanceId, InstanceType: .InstanceType, KeyName: .KeyName, Tags: [.Tags[] | {key: .Key, value: .Value}] | from_entries} | select(.Tags.Name | contains(\"$1\"))]" 2> /dev/null
 }
@@ -137,8 +151,8 @@ function funcdisable {
 
 function loc () {
     if [[ "$1" =~ '^[0-9]+$' ]]; then
-        http https://dataapi.gopuff.com/locations/$1 | jq '{ id, title, state_abbr }'
+        http https://dataapi.gopuff.com/locations/$1 | jq '{ id, title, state_abbr, latitude, longitude }'
     else
-        http https://dataapi.gopuff.com/locations | jq ".[] | select(.title | test(\".*$1.*\"; \"i\")) | { id, title, state_abbr }"
+        http https://dataapi.gopuff.com/locations | jq ".[] | select(.title | test(\".*$1.*\"; \"i\")) | { id, title, state_abbr, latitude, longitude }"
     fi
 }
